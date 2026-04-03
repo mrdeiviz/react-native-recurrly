@@ -53,6 +53,13 @@ export const validateEmailAddress = (emailAddress: string) => {
   return undefined
 }
 
+export const getEmailDomain = (emailAddress: string) => {
+  const value = emailAddress.trim().toLowerCase()
+  const [, domain] = value.split('@')
+
+  return domain || 'unknown'
+}
+
 export const validatePassword = (password: string) => {
   if (!password) {
     return 'Enter your password.'

@@ -17,7 +17,7 @@ export const posthog = new PostHog(apiKey || 'placeholder_key', {
   disabled: !isPostHogConfigured,
   captureAppLifecycleEvents: true,
   debug: __DEV__,
-  flushAt: 20,
+  flushAt: 1,
   flushInterval: 10000,
   maxBatchSize: 100,
   maxQueueSize: 1000,

@@ -1,9 +1,10 @@
-import { useSignIn } from '@clerk/expo'
+import { useSignIn, useUser } from '@clerk/expo'
 import AuthButton from '@/components/auth/AuthButton'
 import AuthField from '@/components/auth/AuthField'
 import AuthShell from '@/components/auth/AuthShell'
 import {
   AUTH_ROUTES,
+  getEmailDomain,
   getAuthErrorState,
   hasEmailCodeSecondFactor,
   validateSignInValues,
@@ -24,6 +25,7 @@ type FinalizeNavigateContext = {
 const SignIn = () => {
   const router = useRouter()
   const { signIn } = useSignIn()
+  const { user } = useUser()
   const posthog = usePostHog()
 
   const [emailAddress, setEmailAddress] = useState('')
@@ -71,10 +73,13 @@ const SignIn = () => {
       return
     }
 
-    posthog.identify(emailAddress.trim(), {
-      $set: { email: emailAddress.trim() },
+    if (user?.id) {
+      posthog.identify(user.id)
+    }
+
+    posthog.capture('user_signed_in', {
+      email_domain: getEmailDomain(emailAddress),
     })
-    posthog.capture('user_signed_in', { email: emailAddress.trim() })
   }
 
   const handleSubmit = async () => {
@@ -97,7 +102,10 @@ const SignIn = () => {
     })
 
     if (error) {
-      posthog.capture('sign_in_failed', { error_code: error.code, email: emailAddress.trim() })
+      posthog.capture('sign_in_failed', {
+        error_code: error.code,
+        email_domain: getEmailDomain(emailAddress),
+      })
       setErrors(getAuthErrorState(error))
       setIsSubmitting(false)
       return

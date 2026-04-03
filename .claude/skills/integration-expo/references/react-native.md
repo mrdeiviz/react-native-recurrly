@@ -6,7 +6,7 @@ Our React Native enables you to integrate PostHog with your React Native project
 
 To install, add the `posthog-react-native` package to your project as well as the required peer dependencies.
 
-#### Expo apps
+### Expo apps
 
 Terminal
 
@@ -34,7 +34,7 @@ If you're using [React Native Web](https://github.com/necolas/react-native-web) 
 
 ### Configuration
 
-#### With the PosthogProvider
+#### With the PostHogProvider
 
 The recommended way to set up PostHog for React Native is to use the `PostHogProvider`. This utilizes the Context API to pass the PostHog client around, and enables [autocapture](/docs/product-analytics/autocapture.md).
 
@@ -75,7 +75,7 @@ const MyComponent = () => {
 }
 ```
 
-#### Without the PosthogProvider
+#### Without the PostHogProvider
 
 If you prefer not to use the provider, you can initialize PostHog in its own file and import the instance from there:
 
@@ -376,7 +376,7 @@ PostHog autocapture can automatically track the following events for you:
 >
 > For React Navigation v7, we recommend disabling automatic screen capture for screens and manually calling `posthog.screen()` inside each screen component. See the [Capturing screen views](/docs/libraries/react-native.md#capturing-screen-views) section below.
 
-With autocapture, all touch events for children of `PosthogProvider` are tracked, capturing a snapshot of the view hierarchy at that point. This enables you to create [insights](/docs/product-analytics/insights.md) in PostHog without having to add custom events.
+With autocapture, all touch events for children of `PostHogProvider` are tracked, capturing a snapshot of the view hierarchy at that point. This enables you to create [insights](/docs/product-analytics/insights.md) in PostHog without having to add custom events.
 
 PostHog will try to generate a sensible name for the touched element based on the React component `displayName` or `name`. If you prefer, you can set your own name using the `ph-label` prop:
 
@@ -552,7 +552,7 @@ posthog.register({
 
 The call above ensures that every event sent by the user will include `"icecream pref": "vanilla"` and `"team_id": 22`. This way, if you filtered events by property using `icecream_pref = vanilla`, it would display all events captured on that user after the `posthog.register` call, since they all include the specified Super Property.
 
-This does **not** set the user's properties. This only sets the properties for their events. To store person properties, see the [setting person properties section](#setting-user-properties).
+This does **not** set the user's properties. This only sets the properties for their events. To store person properties, see the [setting person properties section](#setting-person-properties).
 
 ### Removing stored super properties
 
@@ -1103,7 +1103,7 @@ PostHog AI
 
 ```jsx
 <PostHogProvider
-    debug: {true}
+    debug={true}
     apiKey="<ph_project_token>"
     options={{
         host: "https://us.i.posthog.com",

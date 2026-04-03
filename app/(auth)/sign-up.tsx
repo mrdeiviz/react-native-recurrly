@@ -1,9 +1,10 @@
-import { useSignUp } from '@clerk/expo'
+import { useSignUp, useUser } from '@clerk/expo'
 import AuthButton from '@/components/auth/AuthButton'
 import AuthField from '@/components/auth/AuthField'
 import AuthShell from '@/components/auth/AuthShell'
 import {
   AUTH_ROUTES,
+  getEmailDomain,
   getAuthErrorState,
   validateSignUpValues,
   validateVerificationCode,
@@ -23,6 +24,7 @@ type FinalizeNavigateContext = {
 const SignUp = () => {
   const router = useRouter()
   const { signUp } = useSignUp()
+  const { user } = useUser()
   const posthog = usePostHog()
 
   const [emailAddress, setEmailAddress] = useState('')
@@ -73,11 +75,15 @@ const SignUp = () => {
       return
     }
 
-    posthog.identify(emailAddress.trim(), {
-      $set: { email: emailAddress.trim() },
-      $set_once: { first_sign_up_date: new Date().toISOString() },
+    if (user?.id) {
+      posthog.identify(user.id, {
+        $set_once: { first_sign_up_date: new Date().toISOString() },
+      })
+    }
+
+    posthog.capture('user_signed_up', {
+      email_domain: getEmailDomain(emailAddress),
     })
-    posthog.capture('user_signed_up', { email: emailAddress.trim() })
   }
 
   const handleSubmit = async () => {
@@ -105,7 +111,10 @@ const SignUp = () => {
     })
 
     if (error) {
-      posthog.capture('sign_up_failed', { error_code: error.code, email: emailAddress.trim() })
+      posthog.capture('sign_up_failed', {
+        error_code: error.code,
+        email_domain: getEmailDomain(emailAddress),
+      })
       setErrors(getAuthErrorState(error))
       setIsSubmitting(false)
       return
@@ -119,7 +128,9 @@ const SignUp = () => {
       return
     }
 
-    posthog.capture('email_verification_requested', { email: emailAddress.trim() })
+    posthog.capture('email_verification_requested', {
+      email_domain: getEmailDomain(emailAddress),
+    })
     setVerificationRequested(true)
     setIsSubmitting(false)
   }
@@ -149,7 +160,9 @@ const SignUp = () => {
     }
 
     if (signUp.status === 'complete') {
-      posthog.capture('email_verification_completed', { email: emailAddress.trim() })
+      posthog.capture('email_verification_completed', {
+        email_domain: getEmailDomain(emailAddress),
+      })
       setIsSubmitting(false)
       await handleFinalize()
       return

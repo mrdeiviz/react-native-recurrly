@@ -49,9 +49,18 @@ const Onboarding = () => {
 
         <AuthButton
           label='Back to dashboard'
-          onPress={() => {
-            posthog.capture('onboarding_completed', { task_key: taskKey })
-            router.replace(AUTH_ROUTES.home)
+          onPress={async () => {
+            try {
+              posthog.capture('onboarding_completed', { task_key: taskKey })
+              await Promise.race([
+                posthog.flush(),
+                new Promise((resolve) => setTimeout(resolve, 1200)),
+              ])
+            } catch {
+              // Best effort: navigation should not be blocked if analytics flush fails.
+            } finally {
+              router.replace(AUTH_ROUTES.home)
+            }
           }}
         />
         <AuthButton
