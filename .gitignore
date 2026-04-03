@@ -45,3 +45,4 @@ app-example
 #development
 .codex
 .idea/
+.env
