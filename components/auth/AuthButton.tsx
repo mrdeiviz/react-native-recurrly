@@ -25,7 +25,9 @@ const AuthButton = ({
       disabled={disabled || loading}
       className={clsx(
         isPrimary ? 'auth-button' : 'auth-secondary-button',
-        isPrimary && (disabled || loading) && 'auth-button-disabled'
+        isPrimary
+          ? (disabled || loading) && 'auth-button-disabled'
+          : (disabled || loading) && 'auth-secondary-button-disabled'
       )}
       style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
     >

@@ -4,8 +4,8 @@ import images from '@/constants/images';
 import { AUTH_ROUTES } from '@/lib/auth';
 import { useRouter } from 'expo-router';
 import { styled } from 'nativewind';
-import React from 'react';
-import { Image, ScrollView, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Image, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
 const SafeAreaView = styled(RNSafeAreaView);
@@ -14,6 +14,7 @@ const Settings = () => {
   const router = useRouter();
   const { signOut } = useClerk();
   const { user } = useUser();
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const displayName = [user?.firstName, user?.lastName].filter(Boolean).join(' ')
     || user?.username
     || 'Recurrly member';
@@ -79,9 +80,17 @@ const Settings = () => {
             <AuthButton
               label="Sign out"
               variant="secondary"
+              loading={isSigningOut}
               onPress={async () => {
-                await signOut();
-                router.replace(AUTH_ROUTES.signIn);
+                try {
+                  setIsSigningOut(true);
+                  await signOut();
+                  router.replace(AUTH_ROUTES.signIn);
+                } catch {
+                  Alert.alert('Unable to sign out', 'Please try again in a moment.');
+                } finally {
+                  setIsSigningOut(false);
+                }
               }}
             />
           </View>

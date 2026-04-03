@@ -68,8 +68,6 @@ const SignIn = () => {
       setErrors(getAuthErrorState(error))
       return
     }
-
-    router.replace(AUTH_ROUTES.home)
   }
 
   const handleSubmit = async () => {
@@ -98,8 +96,8 @@ const SignIn = () => {
     }
 
     if (signIn.status === 'complete') {
-      await handleFinalize()
       setIsSubmitting(false)
+      await handleFinalize()
       return
     }
 
@@ -149,7 +147,9 @@ const SignIn = () => {
     }
 
     if (signIn.status === 'complete') {
+      setIsSubmitting(false)
       await handleFinalize()
+      return
     } else {
       setErrors({
         form: 'The verification code was accepted, but the session is not ready yet.',

@@ -46,7 +46,10 @@ const Onboarding = () => {
         <AuthButton
           label='Sign out'
           variant='secondary'
-          onPress={() => signOut({ redirectUrl: AUTH_ROUTES.signIn })}
+          onPress={async () => {
+            await signOut()
+            router.replace(AUTH_ROUTES.signIn)
+          }}
         />
       </View>
     </AuthShell>

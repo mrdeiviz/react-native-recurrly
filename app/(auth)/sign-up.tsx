@@ -70,8 +70,6 @@ const SignUp = () => {
       setErrors(getAuthErrorState(error))
       return
     }
-
-    router.replace(AUTH_ROUTES.home)
   }
 
   const handleSubmit = async () => {
@@ -141,7 +139,9 @@ const SignUp = () => {
     }
 
     if (signUp.status === 'complete') {
+      setIsSubmitting(false)
       await handleFinalize()
+      return
     } else {
       setErrors({
         form: 'Your code was accepted, but the account is not ready yet.',
