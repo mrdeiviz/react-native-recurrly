@@ -226,6 +226,46 @@
         @apply py-4 text-sm font-sans-medium text-black/60;
     }
 
+    .subscriptions-screen {
+        @apply flex-1 bg-background p-5;
+    }
+
+    .subscriptions-content {
+        @apply pb-24;
+    }
+
+    .subscriptions-header {
+        @apply mb-5 gap-2;
+    }
+
+    .subscriptions-title {
+        @apply text-3xl font-sans-bold text-primary;
+    }
+
+    .subscriptions-subtitle {
+        @apply text-base font-sans-medium text-muted-foreground;
+    }
+
+    .subscriptions-search-shell {
+        @apply mb-5 min-h-14 flex-row items-center rounded-2xl border border-border bg-card px-4;
+    }
+
+    .subscriptions-search-input {
+        @apply flex-1 py-3.5 text-base font-sans-medium text-primary;
+    }
+
+    .subscriptions-empty-wrap {
+        @apply rounded-3xl border border-dashed border-border bg-card px-5 py-8;
+    }
+
+    .subscriptions-empty-title {
+        @apply text-lg font-sans-bold text-primary;
+    }
+
+    .subscriptions-empty-copy {
+        @apply mt-2 text-sm font-sans-medium leading-6 text-muted-foreground;
+    }
+
     .auth-safe-area {
         @apply flex-1 bg-background;
     }

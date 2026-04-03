@@ -1,9 +1,10 @@
-import { useSignUp } from '@clerk/expo'
+import { useSignUp, useUser } from '@clerk/expo'
 import AuthButton from '@/components/auth/AuthButton'
 import AuthField from '@/components/auth/AuthField'
 import AuthShell from '@/components/auth/AuthShell'
 import {
   AUTH_ROUTES,
+  getEmailDomain,
   getAuthErrorState,
   validateSignUpValues,
   validateVerificationCode,
@@ -13,6 +14,7 @@ import * as ExpoLinking from 'expo-linking'
 import { Link, type Href, useRouter } from 'expo-router'
 import React, { useMemo, useState } from 'react'
 import { Text, View } from 'react-native'
+import { usePostHog } from 'posthog-react-native'
 
 type FinalizeNavigateContext = {
   session?: { currentTask?: { key?: string | null } }
@@ -22,6 +24,8 @@ type FinalizeNavigateContext = {
 const SignUp = () => {
   const router = useRouter()
   const { signUp } = useSignUp()
+  const { user } = useUser()
+  const posthog = usePostHog()
 
   const [emailAddress, setEmailAddress] = useState('')
   const [password, setPassword] = useState('')
@@ -70,6 +74,16 @@ const SignUp = () => {
       setErrors(getAuthErrorState(error))
       return
     }
+
+    if (user?.id) {
+      posthog.identify(user.id, {
+        $set_once: { first_sign_up_date: new Date().toISOString() },
+      })
+    }
+
+    posthog.capture('user_signed_up', {
+      email_domain: getEmailDomain(emailAddress),
+    })
   }
 
   const handleSubmit = async () => {
@@ -97,6 +111,10 @@ const SignUp = () => {
     })
 
     if (error) {
+      posthog.capture('sign_up_failed', {
+        error_code: error.code,
+        email_domain: getEmailDomain(emailAddress),
+      })
       setErrors(getAuthErrorState(error))
       setIsSubmitting(false)
       return
@@ -110,6 +128,9 @@ const SignUp = () => {
       return
     }
 
+    posthog.capture('email_verification_requested', {
+      email_domain: getEmailDomain(emailAddress),
+    })
     setVerificationRequested(true)
     setIsSubmitting(false)
   }
@@ -139,6 +160,9 @@ const SignUp = () => {
     }
 
     if (signUp.status === 'complete') {
+      posthog.capture('email_verification_completed', {
+        email_domain: getEmailDomain(emailAddress),
+      })
       setIsSubmitting(false)
       await handleFinalize()
       return

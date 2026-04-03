@@ -3,14 +3,22 @@ import AuthButton from '@/components/auth/AuthButton'
 import AuthShell from '@/components/auth/AuthShell'
 import { AUTH_ROUTES, getPendingTaskCopy } from '@/lib/auth'
 import { Redirect, useRouter } from 'expo-router'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Text, View } from 'react-native'
+import { usePostHog } from 'posthog-react-native'
 
 const Onboarding = () => {
   const router = useRouter()
   const { signOut } = useClerk()
   const { isLoaded, session } = useSession()
+  const posthog = usePostHog()
   const taskKey = session?.currentTask?.key
+
+  useEffect(() => {
+    if (isLoaded && taskKey) {
+      posthog.capture('onboarding_viewed', { task_key: taskKey })
+    }
+  }, [isLoaded, taskKey, posthog])
 
   if (!isLoaded) {
     return null
@@ -41,7 +49,19 @@ const Onboarding = () => {
 
         <AuthButton
           label='Back to dashboard'
-          onPress={() => router.replace(AUTH_ROUTES.home)}
+          onPress={async () => {
+            try {
+              posthog.capture('onboarding_completed', { task_key: taskKey })
+              await Promise.race([
+                posthog.flush(),
+                new Promise((resolve) => setTimeout(resolve, 1200)),
+              ])
+            } catch {
+              // Best effort: navigation should not be blocked if analytics flush fails.
+            } finally {
+              router.replace(AUTH_ROUTES.home)
+            }
+          }}
         />
         <AuthButton
           label='Sign out'

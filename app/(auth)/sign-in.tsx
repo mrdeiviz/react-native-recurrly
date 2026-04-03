@@ -1,9 +1,10 @@
-import { useSignIn } from '@clerk/expo'
+import { useSignIn, useUser } from '@clerk/expo'
 import AuthButton from '@/components/auth/AuthButton'
 import AuthField from '@/components/auth/AuthField'
 import AuthShell from '@/components/auth/AuthShell'
 import {
   AUTH_ROUTES,
+  getEmailDomain,
   getAuthErrorState,
   hasEmailCodeSecondFactor,
   validateSignInValues,
@@ -14,6 +15,7 @@ import * as ExpoLinking from 'expo-linking'
 import { Link, type Href, useRouter } from 'expo-router'
 import React, { useMemo, useState } from 'react'
 import { Text, View } from 'react-native'
+import { usePostHog } from 'posthog-react-native'
 
 type FinalizeNavigateContext = {
   session?: { currentTask?: { key?: string | null } }
@@ -23,6 +25,8 @@ type FinalizeNavigateContext = {
 const SignIn = () => {
   const router = useRouter()
   const { signIn } = useSignIn()
+  const { user } = useUser()
+  const posthog = usePostHog()
 
   const [emailAddress, setEmailAddress] = useState('')
   const [password, setPassword] = useState('')
@@ -68,6 +72,14 @@ const SignIn = () => {
       setErrors(getAuthErrorState(error))
       return
     }
+
+    if (user?.id) {
+      posthog.identify(user.id)
+    }
+
+    posthog.capture('user_signed_in', {
+      email_domain: getEmailDomain(emailAddress),
+    })
   }
 
   const handleSubmit = async () => {
@@ -90,6 +102,10 @@ const SignIn = () => {
     })
 
     if (error) {
+      posthog.capture('sign_in_failed', {
+        error_code: error.code,
+        email_domain: getEmailDomain(emailAddress),
+      })
       setErrors(getAuthErrorState(error))
       setIsSubmitting(false)
       return
