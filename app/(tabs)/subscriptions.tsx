@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons'
 import SubscriptionCard from '@/components/SubscriptionCard'
-import { HOME_SUBSCRIPTIONS } from '@/constants/data'
 import { colors } from '@/constants/theme'
+import { useSubscriptions } from '@/lib/subscriptions'
 import { styled } from 'nativewind'
 import React, { useMemo, useState } from 'react'
 import { FlatList, Text, TextInput, View } from 'react-native'
@@ -14,15 +14,16 @@ const normalizeValue = (value?: string) => value?.trim().toLowerCase() || ''
 const Subscriptions = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<string | null>(null)
+  const { subscriptions } = useSubscriptions()
 
   const filteredSubscriptions = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase()
 
     if (!normalizedQuery) {
-      return HOME_SUBSCRIPTIONS
+      return subscriptions
     }
 
-    return HOME_SUBSCRIPTIONS.filter((subscription) => {
+    return subscriptions.filter((subscription) => {
       const searchFields = [
         subscription.name,
         subscription.category,
@@ -34,7 +35,7 @@ const Subscriptions = () => {
 
       return searchFields.some((field) => normalizeValue(field).includes(normalizedQuery))
     })
-  }, [searchQuery])
+  }, [searchQuery, subscriptions])
 
   return (
     <SafeAreaView className='subscriptions-screen'>
