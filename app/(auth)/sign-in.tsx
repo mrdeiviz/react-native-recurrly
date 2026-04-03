@@ -14,6 +14,7 @@ import * as ExpoLinking from 'expo-linking'
 import { Link, type Href, useRouter } from 'expo-router'
 import React, { useMemo, useState } from 'react'
 import { Text, View } from 'react-native'
+import { usePostHog } from 'posthog-react-native'
 
 type FinalizeNavigateContext = {
   session?: { currentTask?: { key?: string | null } }
@@ -23,6 +24,7 @@ type FinalizeNavigateContext = {
 const SignIn = () => {
   const router = useRouter()
   const { signIn } = useSignIn()
+  const posthog = usePostHog()
 
   const [emailAddress, setEmailAddress] = useState('')
   const [password, setPassword] = useState('')
@@ -68,6 +70,11 @@ const SignIn = () => {
       setErrors(getAuthErrorState(error))
       return
     }
+
+    posthog.identify(emailAddress.trim(), {
+      $set: { email: emailAddress.trim() },
+    })
+    posthog.capture('user_signed_in', { email: emailAddress.trim() })
   }
 
   const handleSubmit = async () => {
@@ -90,6 +97,7 @@ const SignIn = () => {
     })
 
     if (error) {
+      posthog.capture('sign_in_failed', { error_code: error.code, email: emailAddress.trim() })
       setErrors(getAuthErrorState(error))
       setIsSubmitting(false)
       return
